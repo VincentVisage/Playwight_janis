@@ -171,16 +171,6 @@ class Ebay():
 
             shipment_box = order_box.locator(".shipment-info")
 
-            # try:
-            #     order["dev_state"] = await shipment_box.locator(".shipment-card-sub-title").text_content()
-            # except:
-            #     order["dev_state"] = "Returned or Canceled"
-
-            # try:
-            #     order["track_number"] = await shipment_box.locator(".tracking-box").locator(".tracking-info").locator("dd").text_content()
-            # except:
-            #     order["track_number"] = "Awaiting shipment"
-
             if count:= await shipment_box.locator(".shipment-card-sub-title").count():
                 order_dev_sate = await shipment_box.locator(".shipment-card-sub-title").all()
                 if len(order_dev_sate) == 1:
@@ -207,8 +197,8 @@ class Ebay():
             order["product"]["price"] = float(( await (await item.locator(".item-price").all())[0].text_content()).split(" ")[-1].replace("$", "").replace(",", "").replace("C", "")) / order["product"]["item_qty"]
             
             order_summary = page.locator("#payment-info").locator(".order-summary")
-            payment_items = await order_summary.locator(".vodlabelsValues").all()
-            if payment_items:
+            payment_items = await order_summary.locator(".payment-line-items").locator(".vodlabelsValues").all()
+            if payment_items and len(payment_items) == 3:
                 order["order_summary"]["items_price"] = float((await payment_items[0].locator("dd").text_content()).replace(",", "").replace("$", "").replace("C", ""))
                 shipping = (await payment_items[1].locator("dd").text_content()).strip()
                 if shipping == "Free":
@@ -216,7 +206,15 @@ class Ebay():
                 else:
                     order["order_summary"]["shipping"] = float(shipping.replace(",", "").replace("$", "").replace("C", ""))
                 order["order_summary"]["tax"] = float((await payment_items[2].locator("dd").text_content()).replace(",", "").replace("$", "").replace("C", ""))
-
+            elif payment_items and len(payment_items) == 4:
+                order["order_summary"]["items_price"] = float((await payment_items[0].locator("dd").text_content()).replace(",", "").replace("$", "").replace("C", ""))
+                order["order_summary"]["discount"] = float((await payment_items[1].locator("dd").text_content()).replace(",", "").replace("$", "").replace("C", ""))
+                shipping = (await payment_items[2].locator("dd").text_content()).strip()
+                if shipping == "Free":
+                    order["order_summary"]["shipping"] = 0.0
+                else:
+                    order["order_summary"]["shipping"] = float(shipping.replace(",", "").replace("$", "").replace("C", ""))
+                order["order_summary"]["tax"] = float((await payment_items[3].locator("dd").text_content()).replace(",", "").replace("$", "").replace("C", ""))
             order_total = await order_summary.locator(".order-summary-total").locator(".vodlabelsValues").all()
             if order_total:
                 order["order_summary"]["order_total"] = float((await order_total[0].locator("dd").text_content()).replace(",", "").replace("$", "").replace("C", ""))
@@ -279,12 +277,14 @@ class Ebay():
 
     async def _send_data(self):
         async with aiohttp.ClientSession() as session:
-            async with session.post(API_URL, json=self.data) as response:
-                if response.status == 200:
-                    pprint(json.dumps(self.data, ensure_ascii=False, indent=2))
-                    print("Fine")
+            if self.data:
+                async with session.post(API_URL, json=self.data) as response:
+                    if response.status == 200:
+                        pprint(json.dumps(self.data, ensure_ascii=False, indent=2))
+                        print("Fine")
                 
     
     async def _connection(self, page: Page):
         await page.goto(r'https://signin.ebay.com/signin/', timeout=20000)
         input()
+        

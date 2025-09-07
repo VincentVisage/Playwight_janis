@@ -10,13 +10,19 @@ async def main():
     accounts = get_accounts()
 
     while True:
+        
         for acc in accounts:
-            if acc["marketplace"] == "amazon":
-                amazon = Amazon(acc)
-                await amazon.run()
-            elif acc["marketplace"] == "ebay":
-                ebay = Ebay(acc)
-                await ebay.run()
+            try:
+                if acc["marketplace"] == "amazon":
+                    amazon = Amazon(acc)
+                    await amazon.run()
+                elif acc["marketplace"] == "ebay":
+                    ebay = Ebay(acc)
+                    await ebay.run()
+            except:
+                pass
+            
+        time.sleep(25200)
 
 if __name__ == "__main__":
     asyncio.run(main())

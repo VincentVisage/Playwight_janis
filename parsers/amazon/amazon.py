@@ -347,7 +347,8 @@ class Amazon():
 
     async def _send_data(self):
         async with aiohttp.ClientSession() as session:
-            async with session.post(API_URL, json=self.data) as response:
-                if response.status == 200:
-                    print(json.dumps(self.data, ensure_ascii=False, indent=2))
-                    print("Fine")
+            if self.data:
+                async with session.post(API_URL, json=self.data) as response:
+                    if response.status == 200:
+                        print(json.dumps(self.data, ensure_ascii=False, indent=2))
+                        print("Fine")

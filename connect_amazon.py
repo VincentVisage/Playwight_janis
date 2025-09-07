@@ -4,7 +4,7 @@ import asyncio
 
 
 new_account = {
-    "login": "zaingrazes@gmail.com",
+    "login": "",
     }
 
 async def add_new_account_amazon(new_account):

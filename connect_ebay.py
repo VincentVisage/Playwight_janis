@@ -1,15 +1,15 @@
-from parsers.ebay.ebay import Ebay
+from parsers.amazon.amazon import Amazon
 
 import asyncio
 
+
 new_account = {
-    "login": "9micro3",
+    "login": "",
     }
 
-async def add_new_account_ebey(new_account):
-    ebay_acc = Ebay(account=new_account)
-    await ebay_acc.connect()
-
+async def add_new_account_amazon(new_account):
+    amazon_acc = Amazon(account=new_account)
+    await amazon_acc.connect()
 
 if __name__ == "__main__":
-    asyncio.run(add_new_account_ebey(new_account))
+    asyncio.run(add_new_account_amazon(new_account))
